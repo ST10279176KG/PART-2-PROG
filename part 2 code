@@ -1,21 +1,26 @@
+
 using System;
 using System.Collections.Generic;
+
+// Define a delegate for calorie notification
+delegate void CalorieNotification(string recipeName);
 
 class RecipeApp
 {
     static void Main(string[] args)
     {
-        // List to store all recipes
         List<Recipe> recipes = new List<Recipe>();
 
-        // Main loop
+        // Main loop for the recipe manager
         while (true)
         {
+            // Display menu options
             Console.WriteLine("Recipe Manager");
             Console.WriteLine("1. Enter New Recipe");
             Console.WriteLine("2. Display All Recipes");
             Console.WriteLine("3. Select Recipe");
-            Console.WriteLine("4. Exit");
+            Console.WriteLine("4. Scale Recipe");
+            Console.WriteLine("5. Exit");
             Console.Write("Enter your choice: ");
 
             string choice = Console.ReadLine().Trim();
@@ -30,8 +35,12 @@ class RecipeApp
                     break;
                 case "3":
                     SelectRecipe(recipes);
+                    Console.WriteLine();
                     break;
                 case "4":
+                    ScaleRecipe(recipes);
+                    break;
+                case "5":
                     Console.WriteLine("Exiting Recipe Manager...");
                     return;
                 default:
@@ -41,6 +50,7 @@ class RecipeApp
         }
     }
 
+    // Method to enter a new recipe
     static void EnterNewRecipe(List<Recipe> recipes)
     {
         Console.Write("Enter Recipe Name: ");
@@ -51,6 +61,7 @@ class RecipeApp
         Console.WriteLine("Recipe added successfully!");
     }
 
+    // Method to create a new recipe
     static Recipe CreateRecipe(string recipeName)
     {
         List<Ingredient> ingredients = new List<Ingredient>();
@@ -86,6 +97,7 @@ class RecipeApp
         return new Recipe(recipeName, ingredients, steps);
     }
 
+    // Method to display all recipes
     static void DisplayAllRecipes(List<Recipe> recipes)
     {
         if (recipes.Count == 0)
@@ -95,13 +107,14 @@ class RecipeApp
         }
 
         Console.WriteLine("All Recipes:");
-        recipes.Sort((r1, r2) => r1.Name.CompareTo(r2.Name)); // Sort by recipe name
+        recipes.Sort((r1, r2) => r1.Name.CompareTo(r2.Name));
         foreach (Recipe recipe in recipes)
         {
             Console.WriteLine($"- {recipe.Name}");
         }
     }
 
+    // Method to select and display a specific recipe
     static void SelectRecipe(List<Recipe> recipes)
     {
         if (recipes.Count == 0)
@@ -122,6 +135,7 @@ class RecipeApp
         DisplayRecipe(selectedRecipe);
     }
 
+    // Method to display details of a recipe
     static void DisplayRecipe(Recipe recipe)
     {
         Console.WriteLine($"Recipe: {recipe.Name}");
@@ -134,6 +148,12 @@ class RecipeApp
             totalCalories += ingredient.Calories;
         }
 
+        // Check if total calories exceed 300 and notify the user using a delegate
+        if (totalCalories > 300)
+        {
+            NotifyExceedCalories(recipe.Name);
+        }
+
         Console.WriteLine("Steps:");
         for (int i = 0; i < recipe.Steps.Count; i++)
         {
@@ -142,30 +162,78 @@ class RecipeApp
 
         Console.WriteLine($"Total Calories: {totalCalories}");
     }
+
+    // Method to scale a recipe
+    static void ScaleRecipe(List<Recipe> recipes)
+    {
+        if (recipes.Count == 0)
+        {
+            Console.WriteLine("No recipes found.");
+            return;
+        }
+
+        DisplayAllRecipes(recipes);
+        Console.Write("Enter recipe name to scale: ");
+        string recipeName = Console.ReadLine().Trim();
+        Recipe selectedRecipe = recipes.Find(r => r.Name == recipeName);
+        if (selectedRecipe == null)
+        {
+            Console.WriteLine("Recipe not found.");
+            return;
+        }
+
+        Console.Write("Enter scaling factor (0.5 for half, 2 for double, 3 for triple): ");
+        double scalingFactor = double.Parse(Console.ReadLine().Trim());
+
+        // Scale the recipe
+        selectedRecipe.ScaleIngredients(scalingFactor);
+
+        // Display the scaled recipe
+        DisplayRecipe(selectedRecipe);
+    }
+
+    // Method to notify the user when recipe exceeds 300 calories
+    static void NotifyExceedCalories(string recipeName)
+    {
+        Console.WriteLine($"Warning: The total calories of '{recipeName}' exceeds 300.");
+    }
 }
 
+// Class representing a recipe
 class Recipe
 {
     public string Name { get; }
     public List<Ingredient> Ingredients { get; }
     public List<string> Steps { get; }
 
+    // Constructor to initialize recipe object
     public Recipe(string name, List<Ingredient> ingredients, List<string> steps)
     {
         Name = name;
         Ingredients = ingredients;
         Steps = steps;
     }
+
+    // Method to scale the quantities of ingredients in the recipe
+    public void ScaleIngredients(double scalingFactor)
+    {
+        foreach (Ingredient ingredient in Ingredients)
+        {
+            ingredient.Quantity *= scalingFactor;
+        }
+    }
 }
 
+// Class representing an ingredient
 class Ingredient
 {
     public string Name { get; }
-    public double Quantity { get; }
+    public double Quantity { get; set; }
     public string Unit { get; }
     public double Calories { get; }
     public string FoodGroup { get; }
 
+    // Constructor to initialize ingredient object
     public Ingredient(string name, double quantity, string unit, double calories, string foodGroup)
     {
         Name = name;
@@ -175,4 +243,3 @@ class Ingredient
         FoodGroup = foodGroup;
     }
 }
-
