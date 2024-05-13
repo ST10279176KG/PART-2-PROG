@@ -1,0 +1,178 @@
+using System;
+using System.Collections.Generic;
+
+class RecipeApp
+{
+    static void Main(string[] args)
+    {
+        // List to store all recipes
+        List<Recipe> recipes = new List<Recipe>();
+
+        // Main loop
+        while (true)
+        {
+            Console.WriteLine("Recipe Manager");
+            Console.WriteLine("1. Enter New Recipe");
+            Console.WriteLine("2. Display All Recipes");
+            Console.WriteLine("3. Select Recipe");
+            Console.WriteLine("4. Exit");
+            Console.Write("Enter your choice: ");
+
+            string choice = Console.ReadLine().Trim();
+
+            switch (choice)
+            {
+                case "1":
+                    EnterNewRecipe(recipes);
+                    break;
+                case "2":
+                    DisplayAllRecipes(recipes);
+                    break;
+                case "3":
+                    SelectRecipe(recipes);
+                    break;
+                case "4":
+                    Console.WriteLine("Exiting Recipe Manager...");
+                    return;
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    static void EnterNewRecipe(List<Recipe> recipes)
+    {
+        Console.Write("Enter Recipe Name: ");
+        string recipeName = Console.ReadLine().Trim();
+
+        recipes.Add(CreateRecipe(recipeName));
+
+        Console.WriteLine("Recipe added successfully!");
+    }
+
+    static Recipe CreateRecipe(string recipeName)
+    {
+        List<Ingredient> ingredients = new List<Ingredient>();
+        List<string> steps = new List<string>();
+
+        Console.Write("Enter number of ingredients: ");
+        int numIngredients = int.Parse(Console.ReadLine().Trim());
+
+        for (int i = 0; i < numIngredients; i++)
+        {
+            Console.Write($"Enter Ingredient {i + 1} name: ");
+            string name = Console.ReadLine().Trim();
+            Console.Write($"Enter Ingredient {i + 1} quantity: ");
+            double quantity = double.Parse(Console.ReadLine().Trim());
+            Console.Write($"Enter Ingredient {i + 1} unit (e.g., cup, tablespoon): ");
+            string unit = Console.ReadLine().Trim();
+            Console.Write($"Enter Ingredient {i + 1} calories: ");
+            double calories = double.Parse(Console.ReadLine().Trim());
+            Console.Write($"Enter Ingredient {i + 1} food group: ");
+            string foodGroup = Console.ReadLine().Trim();
+            ingredients.Add(new Ingredient(name, quantity, unit, calories, foodGroup));
+        }
+
+        Console.Write("Enter number of steps: ");
+        int numSteps = int.Parse(Console.ReadLine().Trim());
+        for (int i = 0; i < numSteps; i++)
+        {
+            Console.Write($"Enter Step {i + 1} description: ");
+            string step = Console.ReadLine().Trim();
+            steps.Add(step);
+        }
+
+        return new Recipe(recipeName, ingredients, steps);
+    }
+
+    static void DisplayAllRecipes(List<Recipe> recipes)
+    {
+        if (recipes.Count == 0)
+        {
+            Console.WriteLine("No recipes found.");
+            return;
+        }
+
+        Console.WriteLine("All Recipes:");
+        recipes.Sort((r1, r2) => r1.Name.CompareTo(r2.Name)); // Sort by recipe name
+        foreach (Recipe recipe in recipes)
+        {
+            Console.WriteLine($"- {recipe.Name}");
+        }
+    }
+
+    static void SelectRecipe(List<Recipe> recipes)
+    {
+        if (recipes.Count == 0)
+        {
+            Console.WriteLine("No recipes found.");
+            return;
+        }
+
+        DisplayAllRecipes(recipes);
+        Console.Write("Enter recipe name to select: ");
+        string recipeName = Console.ReadLine().Trim();
+        Recipe selectedRecipe = recipes.Find(r => r.Name == recipeName);
+        if (selectedRecipe == null)
+        {
+            Console.WriteLine("Recipe not found.");
+            return;
+        }
+        DisplayRecipe(selectedRecipe);
+    }
+
+    static void DisplayRecipe(Recipe recipe)
+    {
+        Console.WriteLine($"Recipe: {recipe.Name}");
+        Console.WriteLine("Ingredients:");
+
+        double totalCalories = 0;
+        foreach (Ingredient ingredient in recipe.Ingredients)
+        {
+            Console.WriteLine($"- {ingredient.Name}: {ingredient.Quantity} {ingredient.Unit}");
+            totalCalories += ingredient.Calories;
+        }
+
+        Console.WriteLine("Steps:");
+        for (int i = 0; i < recipe.Steps.Count; i++)
+        {
+            Console.WriteLine($"- Step {i + 1}: {recipe.Steps[i]}");
+        }
+
+        Console.WriteLine($"Total Calories: {totalCalories}");
+    }
+}
+
+class Recipe
+{
+    public string Name { get; }
+    public List<Ingredient> Ingredients { get; }
+    public List<string> Steps { get; }
+
+    public Recipe(string name, List<Ingredient> ingredients, List<string> steps)
+    {
+        Name = name;
+        Ingredients = ingredients;
+        Steps = steps;
+    }
+}
+
+class Ingredient
+{
+    public string Name { get; }
+    public double Quantity { get; }
+    public string Unit { get; }
+    public double Calories { get; }
+    public string FoodGroup { get; }
+
+    public Ingredient(string name, double quantity, string unit, double calories, string foodGroup)
+    {
+        Name = name;
+        Quantity = quantity;
+        Unit = unit;
+        Calories = calories;
+        FoodGroup = foodGroup;
+    }
+}
+
